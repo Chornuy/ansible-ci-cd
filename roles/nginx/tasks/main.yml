@@ -1,0 +1,41 @@
+---
+- name: Include ubuntu variables
+  include_vars: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'
+
+- name: Include RedHat variables
+  include_vars: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+
+- name: Define nginx_user.
+  set_fact:
+    nginx_user: "{{ __nginx_user }}"
+  when: nginx_user is not defined
+
+- include_tasks: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+
+- include_tasks: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'
+
+- import_tasks: vhosts.yml
+
+- name: Copy nginx configuration in place.
+  template:
+    src: "{{ nginx_conf_template }}"
+    dest: "{{ nginx_conf_file_path }}"
+    owner: root
+    group: "{{ root_group }}"
+    mode: 0644
+  notify:
+    - reload nginx
+
+- name: Ensure nginx service is running as configured.
+  service:
+    name: nginx
+    state: "{{ nginx_service_state }}"
+    enabled: "{{ nginx_service_enabled }}"

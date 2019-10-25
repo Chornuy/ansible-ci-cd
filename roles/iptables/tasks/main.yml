@@ -1,0 +1,63 @@
+- name: start common role for redhat
+  import_tasks: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+
+- name: start common role for ubuntu
+  import_tasks: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'
+
+- name: Flush existing firewall rules
+  iptables:
+    flush: true
+
+- name: Firewall rule - allow all loopback traffic
+  iptables:
+    action: append
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+
+- name: Firewall rule - allow established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Firewall rule - allow port ping traffic
+  iptables:
+    chain: INPUT
+    jump: ACCEPT
+    protocol: icmp
+
+- name: Firewall rule - allow port 22/SSH traffic
+  iptables:
+    chain: INPUT
+    destination_port: 22
+    jump: ACCEPT
+    protocol: tcp
+
+- name: Firewall rule - allow port 80/HTTP traffic
+  iptables:
+    chain: INPUT
+    destination_port: 80
+    jump: ACCEPT
+    protocol: tcp
+
+- name: Firewall rule - allow port 443/HTTPS traffic
+  iptables:
+    chain: INPUT
+    destination_port: 443
+    jump: ACCEPT
+    protocol: tcp
+
+- name: Firewall rule - drop any traffic without rule
+  iptables:
+    chain: INPUT
+    jump: DROP
+
+- name: Allow all output traffic
+  iptables:
+    chain: OUTPUT
+    jump: ACCEPT

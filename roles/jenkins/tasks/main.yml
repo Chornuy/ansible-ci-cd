@@ -1,0 +1,80 @@
+---
+
+- name: Include RedHat variables
+  include_vars: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+
+- name: Include ubuntu variables
+  include_vars: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'
+
+- name: Define jenkins_repo_url
+  set_fact:
+    jenkins_repo_url: "{{ __jenkins_repo_url }}"
+  when: jenkins_repo_url is not defined
+
+- name: Define jenkins_repo_key_url
+  set_fact:
+    jenkins_repo_key_url: "{{ __jenkins_repo_key_url }}"
+  when: jenkins_repo_key_url is not defined
+
+- name: Define jenkins_pkg_url
+  set_fact:
+    jenkins_pkg_url: "{{ __jenkins_pkg_url }}"
+  when: jenkins_pkg_url is not defined
+
+- name: Define java_packages.
+  set_fact:
+    java_packages: "{{ __java_packages | list }}"
+  when: java_packages is not defined
+
+- include_tasks: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+   
+- import_tasks: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'
+
+- include_tasks: settings.yml
+
+- name: Ensure Jenkins is started and runs on startup.
+  service: name=jenkins state=started enabled=yes
+
+- name: Debug variable
+  debug:
+    msg: "{{ jenkins_protocol }}://{{ jenkins_hostname }}:{{ jenkins_reverse_proxy_port }}{{ jenkins_url_prefix }}/cli/"
+
+- name: Wait for Jenkins to start up before proceeding.
+  command: >
+    curl -D - --silent --max-time 5 {{ jenkins_protocol }}://{{ jenkins_hostname }}:{{ jenkins_reverse_proxy_port }}{{ jenkins_url_prefix }}/cli/
+  args:
+    warn: false
+  register: result
+  until: >
+    (result.stdout.find("403 Forbidden") != -1)
+    or (result.stdout.find("200 OK") != -1)
+    and (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_connection_retries }}"
+  delay: "{{ jenkins_connection_delay }}"
+  changed_when: false
+  check_mode: false
+
+- name: Get the jenkins-cli jarfile from the Jenkins server.
+  get_url:
+    url: "{{ jenkins_protocol }}://{{ jenkins_hostname }}:{{ jenkins_reverse_proxy_port }}{{ jenkins_url_prefix }}/jnlpJars/jenkins-cli.jar"
+    dest: "{{ jenkins_jar_location }}"
+  register: jarfile_get
+  until: "'OK' in jarfile_get.msg or '304' in jarfile_get.msg or 'file already exists' in jarfile_get.msg"
+  retries: 5
+  delay: 10
+  check_mode: false
+
+- name: Remove Jenkins security init scripts after first startup.
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d/basic-security.groovy"
+    state: absent
+
+- include_tasks: plugins.yml

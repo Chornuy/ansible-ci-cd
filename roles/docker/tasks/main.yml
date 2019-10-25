@@ -1,0 +1,35 @@
+---
+- name: start common role for redhat
+  import_tasks: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+
+- name: start common role for ubuntu
+  import_tasks: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'
+
+- name: Install Docker.
+  package:
+    name: "{{ docker_package }}"
+    state: "{{ docker_package_state }}"
+  notify: restart docker
+
+# TODO: Remove this shim once 18.09.1 or later is released.
+- import_tasks: docker-1809-shim.yml
+  when: ansible_service_mgr == 'systemd'
+
+- name: Ensure Docker is started and enabled at boot.
+  service:
+    name: docker
+    state: "{{ docker_service_state }}"
+    enabled: "{{ docker_service_enabled }}"
+
+- name: Ensure handlers are notified now to avoid firewall conflicts.
+  meta: flush_handlers
+
+- include_tasks: docker-compose.yml
+  when: docker_install_compose | bool
+
+- include_tasks: docker-users.yml
+  when: docker_users | length > 0

@@ -1,0 +1,23 @@
+---
+
+jenkins_url_prefix: ""
+
+jenkins_admin_username: admin
+jenkins_admin_password: admin
+
+nginx_user: "{{ __nginx_user }}"
+jenkins_group: "{{ jenkins_process_group }}"
+
+jenkins_proxy_port: "80"
+
+jenkins_init_options: []
+
+docker_users: 
+  - jenkins_group
+
+nginx_upstreams: 
+  - name: jenkins
+    keepalive: 32 # optional
+    servers: {
+      "127.0.0.1:8080"
+    }
