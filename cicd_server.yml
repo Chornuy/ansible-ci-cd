@@ -1,0 +1,13 @@
+  - hosts: cicd_server
+    roles:
+    - common
+    - iptables
+    - fail2ban
+    - jenkins 
+
+  - hosts: ubuntu_server
+    roles:
+    - common
+    - iptables
+    - fail2ban
+    - jenkins
