@@ -28,13 +28,13 @@
   when:
     - ansible_facts['os_family']|lower == 'redhat'
     - ansible_distribution|lower != 'fedora'
-  
+
 - name: Modify variables in init file.
   template:
     src: jenkins.ubuntu.j2
     dest: "{{ jenkins_init_file }}"
   register: jenkins_init_prefix
-  when: 
+  when:
     - ansible_distribution|lower == 'ubuntu'
 
 - name: Set the Jenkins home directory.

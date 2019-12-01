@@ -34,7 +34,7 @@ jenkins_reverse_proxy_port: "{{ jenkins_http_port }}"
 
 jenkins_init_options:
     - option: "prefix"
-      value: "{{ jenkins_url_prefix }}"  
+      value: "{{ jenkins_url_prefix }}"
 
 # jenkins_init_changes:
 #   - option: "JENKINS_ARGS"
