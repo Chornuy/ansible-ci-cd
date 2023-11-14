@@ -1,0 +1,10 @@
+  - hosts: ci_cd_server
+    roles:
+    - common
+    - hosts-management
+    - iptables
+    - fail2ban
+    - docker
+    - nginx
+    - jenkins
+    - post-ci-cd

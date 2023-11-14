@@ -1,0 +1,9 @@
+- name: start common role for redhat
+  import_tasks: redhat.yml
+  when: 
+   - ansible_facts['os_family']|lower == 'redhat'
+   - ansible_distribution|lower != 'fedora'
+
+- name: start common role for ubuntu
+  import_tasks: ubuntu.yml
+  when: ansible_distribution|lower == 'ubuntu'

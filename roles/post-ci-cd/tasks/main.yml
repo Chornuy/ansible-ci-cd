@@ -1,0 +1,6 @@
+---
+- name: Add the user nginx jenkins group
+  user:
+    name: "{{ nginx_user }}"
+    groups: "{{ jenkins_group }}"
+    append: yes

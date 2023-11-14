@@ -1,0 +1,10 @@
+# hosts file
+[ci_cd_server]
+192.168.15.200
+192.168.15.201
+
+[centos_server]
+192.168.15.200
+
+[ubuntu_server]
+192.168.15.201

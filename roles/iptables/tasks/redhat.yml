@@ -1,0 +1,22 @@
+- name: Check if Firewalld is installed
+  package_facts:
+    manager: "auto"
+
+- name: Stop service firewalld, if started
+  service:
+    name: firewalld
+    state: stopped
+    enabled: False
+    masked: yes
+  when: "'firewalld' in ansible_facts.packages"
+
+- name: Remove firewalld if exists
+  yum:
+    name: firewalld
+    state: absent
+  when: "'firewalld' in ansible_facts.packages"
+
+- name: Install iptabels
+  yum:
+    name: iptables-services
+    state: present

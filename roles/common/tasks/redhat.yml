@@ -1,0 +1,63 @@
+- name: Install EPEL Repo
+  yum:
+    name: epel-release
+    state: present
+
+- name: Upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+- name: Install git
+  yum:
+    name: git
+    state: present
+    update_cache: yes
+
+- name: Install wget
+  yum:
+    name: wget
+    state: present
+
+- name: Install curl
+  yum:
+    name: curl
+    state: present
+
+- name: Install htop
+  yum:
+    name: htop
+    state: present
+
+- name: Install mc
+  yum:
+    name: mc
+    state: present
+
+- name: Install net-tools
+  yum:
+    name: net-tools
+    state: present
+
+- name: Install ansible
+  yum:
+    name: ansible
+    state: present
+    update_cache: yes
+    enablerepo: epel
+
+- name: Install dependency libsemanage-python
+  yum:
+    name: libsemanage-python
+    state: present
+
+- name: Install nano editor
+  yum:
+    name: nano
+    state: present
+
+- name: Set httpd_can_network_connect flag on and keep it persistent across reboots
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes

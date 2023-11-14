@@ -1,0 +1,32 @@
+- name: "Check if UFW is installed"
+  package_facts:
+    manager: "auto"
+
+- name: Stop service UFW, if started
+  service:
+    name: ufw
+    state: stopped
+    enable: False
+    masked: yes
+  when: "'firewalld' in ansible_facts.packages"
+
+- name: Remove UFW if exists
+  apt:
+    name: firewalld
+    state: absent
+  when: "'ufw' in ansible_facts.packages"
+
+- name: Install iptabels
+  apt:
+    name: iptables
+    state: present
+
+- name: Install iptable-persistant
+  apt:
+    name: iptables-persistent
+    state: present
+
+- name: Install netfilter-persistent
+  apt:
+    name: netfilter-persistent
+    state: present
