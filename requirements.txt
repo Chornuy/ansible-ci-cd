@@ -65,7 +65,7 @@ tabulate==0.8.5
 testinfra==3.2.0
 toml==0.10.0
 tree-format==0.1.2
-urllib3==1.25.6
+urllib3==1.26.18
 virtualenv==16.7.7
 wcwidth==0.1.7
 whichcraft==0.6.1
